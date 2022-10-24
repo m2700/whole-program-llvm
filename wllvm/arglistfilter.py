@@ -28,7 +28,7 @@ DUMPING = False
 # tried, obviously.  The first one that matches is taken, and no order
 # is specified.  Try to avoid overlapping patterns.
 class ArgumentListFilter:
-    def __init__(self, inputList, exactMatches={}, patternMatches={}):
+    def __init__(self, inputList, exactMatches={}, patternMatches=[]):
         defaultArgExactMatches = {
 
             '-' : (0, ArgumentListFilter.standardInCallback),
@@ -244,48 +244,49 @@ class ArgumentListFilter:
         # - compiler warning options: -W....
         # - optimiziation and other flags: -f...
         #
-        defaultArgPatterns = {
-            r'^.+\.(c|cc|cpp|C|cxx|i|s|S|bc)$' : (0, ArgumentListFilter.inputFileCallback),
-            # FORTRAN file types
-            r'^.+\.([fF](|[0-9][0-9]|or|OR|pp|PP))$' : (0, ArgumentListFilter.inputFileCallback),
-            #iam: the object file recogition is not really very robust, object files
-            # should be determined by their existance and contents...
-            r'^.+\.(o|lo|So|so|po|a|dylib)$' : (0, ArgumentListFilter.objectFileCallback),
-            #iam: library.so.4.5.6 probably need a similar pattern for .dylib too.
-            r'^.+\.dylib(\.\d)+$' : (0, ArgumentListFilter.objectFileCallback),
-            r'^.+\.(So|so)(\.\d)+$' : (0, ArgumentListFilter.objectFileCallback),
-            r'^-(l|L).+$' : (0, ArgumentListFilter.linkUnaryCallback),
-            r'^-I.+$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-D.+$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-U.+$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-Wl,.+$' : (0, ArgumentListFilter.linkUnaryCallback),
-            r'^-W(?!l,).*$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-fsanitize=.+$' : (0, ArgumentListFilter.compileLinkUnaryCallback),
-            r'^-f.+$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-rtlib=.+$' : (0, ArgumentListFilter.linkUnaryCallback),
-            r'^-std=.+$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-stdlib=.+$' : (0, ArgumentListFilter.compileLinkUnaryCallback),
-            r'^-mtune=.+$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-mstack-alignment=.+$': (0, ArgumentListFilter.compileUnaryCallback),                     #iam: linux kernel stuff
-            r'^-mcmodel=.+$': (0, ArgumentListFilter.compileUnaryCallback),                              #iam: linux kernel stuff
-            r'^-mpreferred-stack-boundary=.+$': (0, ArgumentListFilter.compileUnaryCallback),            #iam: linux kernel stuff
-            r'^-mindirect-branch=.+$': (0, ArgumentListFilter.compileUnaryCallback),                     #iam: linux kernel stuff
-            r'^-mregparm=.+$' : (0, ArgumentListFilter.compileUnaryCallback),                            #iam: linux kernel stuff
-            r'^-march=.+$' : (0, ArgumentListFilter.compileUnaryCallback),                               #iam: linux kernel stuff
-            r'^--param=.+$' : (0, ArgumentListFilter.compileUnaryCallback),                              #iam: linux kernel stuff
+        defaultArgPatterns = [
+            (r'^-(l|L).+$', (0, ArgumentListFilter.linkUnaryCallback)),
+            (r'^-I.+$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-D.+$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-U.+$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-Wl,.+$', (0, ArgumentListFilter.linkUnaryCallback)),
+            (r'^-W(?!l,).*$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-fsanitize=.+$', (0, ArgumentListFilter.compileLinkUnaryCallback)),
+            (r'^-f.+$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-rtlib=.+$', (0, ArgumentListFilter.linkUnaryCallback)),
+            (r'^-std=.+$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-stdlib=.+$', (0, ArgumentListFilter.compileLinkUnaryCallback)),
+            (r'^-mtune=.+$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-mstack-alignmen,.+$', (0, ArgumentListFilter.compileUnaryCallback)),                     #iam: linux kernel stuff
+            (r'^-mcmode,.+$', (0, ArgumentListFilter.compileUnaryCallback)),                              #iam: linux kernel stuff
+            (r'^-mpreferred-stack-boundar,.+$', (0, ArgumentListFilter.compileUnaryCallback)),            #iam: linux kernel stuff
+            (r'^-mindirect-branc,.+$', (0, ArgumentListFilter.compileUnaryCallback)),                     #iam: linux kernel stuff
+            (r'^-mregparm=.+$', (0, ArgumentListFilter.compileUnaryCallback)),                            #iam: linux kernel stuff
+            (r'^-march=.+$', (0, ArgumentListFilter.compileUnaryCallback)),                               #iam: linux kernel stuff
+            (r'^--param=.+$', (0, ArgumentListFilter.compileUnaryCallback)),                              #iam: linux kernel stuff
 
 
             #iam: mac stuff...
-            r'-mmacosx-version-min=.+$' :  (0, ArgumentListFilter.compileUnaryCallback),
+            (r'-mmacosx-version-min=.+$',  (0, ArgumentListFilter.compileUnaryCallback)),
 
-            r'^--sysroot=.+$' :  (0, ArgumentListFilter.compileUnaryCallback),
-            r'^--gcc-toolchain=.+$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-print-prog-name=.*$' : (0, ArgumentListFilter.compileUnaryCallback),
-            r'^-print-file-name=.*$' : (0, ArgumentListFilter.compileUnaryCallback),
+            (r'^--sysroot=.+$',  (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^--gcc-toolchain=.+$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-print-prog-name=.*$', (0, ArgumentListFilter.compileUnaryCallback)),
+            (r'^-print-file-name=.*$', (0, ArgumentListFilter.compileUnaryCallback)),
             #iam: -xc from yices. why BD?
-            r'^-x.+$' : (0, ArgumentListFilter.compileUnaryCallback),
+            (r'^-x.+$', (0, ArgumentListFilter.compileUnaryCallback)),
 
-        }
+
+            (r'^.+\.(c|cc|cpp|C|cxx|i|s|S|bc)$', (0, ArgumentListFilter.inputFileCallback)),
+            # FORTRAN file types
+            (r'^.+\.([fF](|[0-9][0-9]|or|OR|pp|PP))$', (0, ArgumentListFilter.inputFileCallback)),
+            #iam: the object file recogition is not really very robust, object files
+            # should be determined by their existance and contents...
+            (r'^.+\.(o|lo|So|so|po|a|dylib)$', (0, ArgumentListFilter.objectFileCallback)),
+            #iam: library.so.4.5.6 probably need a similar pattern for .dylib too.
+            (r'^.+\.dylib(\.\d)+$', (0, ArgumentListFilter.objectFileCallback)),
+            (r'^.+\.(So|so)(\.\d)+$', (0, ArgumentListFilter.objectFileCallback)),
+        ]
 
         #iam: try and keep track of the files, input object, and output
         self.inputList = inputList
@@ -311,8 +312,8 @@ class ArgumentListFilter:
 
         argExactMatches = dict(defaultArgExactMatches)
         argExactMatches.update(exactMatches)
-        argPatterns = dict(defaultArgPatterns)
-        argPatterns.update(patternMatches)
+        argPatterns = list(defaultArgPatterns)
+        argPatterns.extend(patternMatches)
 
         self._inputArgs = collections.deque(inputList)
 
@@ -344,7 +345,7 @@ class ArgumentListFilter:
                 self.linkingGroupCallback(linkingGroup)
             else:
                 matched = False
-                for pattern, (arity, handler) in argPatterns.items():
+                for pattern, (arity, handler) in argPatterns:
                     if re.match(pattern, currentItem):
                         flagArgs = self._shiftArgs(arity)
                         handler(self, currentItem, *flagArgs)
